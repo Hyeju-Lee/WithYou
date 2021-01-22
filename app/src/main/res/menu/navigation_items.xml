@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/siren"
+        android:icon="@drawable/siren"
+        android:enabled="true"
+        android:title="siren"/>
+    <item
+        android:id="@+id/taxi"
+        android:icon="@drawable/taxi"
+        android:enabled="true"
+        android:title="taxi"/>
+    <item
+        android:id="@+id/home"
+        android:icon="@drawable/ic_home_black_24dp"
+        android:enabled="true"
+        android:title="home"/>
+    <item
+        android:id="@+id/navigation"
+        android:icon="@drawable/navigation"
+        android:enabled="true"
+        android:title="navigation"/>
+    <item
+        android:id="@+id/setting"
+        android:icon="@drawable/setting"
+        android:enabled="true"
+        android:title="setting"/>
+
+</menu>
