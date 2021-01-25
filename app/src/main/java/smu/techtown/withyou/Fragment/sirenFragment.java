@@ -41,6 +41,7 @@ public class sirenFragment extends Fragment {
         sirenStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                sirenStart.setBackgroundResource(R.drawable.sirenon);
                 mediaPlayer.start();
             }
         });
@@ -48,6 +49,7 @@ public class sirenFragment extends Fragment {
         sirenStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                sirenStart.setBackgroundResource(R.drawable.sirenoff);
                 mediaPlayer.stop();
                 try{
                     mediaPlayer.prepare();

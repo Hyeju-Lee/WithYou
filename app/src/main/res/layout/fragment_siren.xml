@@ -11,8 +11,8 @@
         android:layout_height="270dp"
         android:layout_centerInParent="true"
         android:id="@+id/sirenStart"
-        android:background="@drawable/sirentab"/>
-
+        android:background="@drawable/sirenoff"
+        android:layout_marginBottom="30dp"/>
     <Button
         android:layout_width="250dp"
         android:layout_height="wrap_content"
