@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sirensound">
+        <item>경찰차</item>
+        <item>소방차</item>
+        <item>살려주세요</item>
+    </string-array>
+    <string-array name="sirensound_value">
+        <item>police</item>
+        <item>fireStation</item>
+        <item>shout</item>
+    </string-array>
+</resources>

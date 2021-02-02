@@ -18,7 +18,7 @@ import android.widget.Spinner;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class taxiFragment extends Fragment {
+public class TaxiFragment extends Fragment {
     Spinner taxiSpinner;
     Spinner hourSpinner;
     Spinner minSpinner;
@@ -27,7 +27,7 @@ public class taxiFragment extends Fragment {
     EditText lastTaxiNum;
 
     int onOff= 1;
-    public taxiFragment() {
+    public TaxiFragment() {
         // Required empty public constructor
     }
 

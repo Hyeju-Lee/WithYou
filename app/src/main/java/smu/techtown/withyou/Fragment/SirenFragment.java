@@ -19,12 +19,12 @@ import java.io.IOException;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class sirenFragment extends Fragment {
+public class SirenFragment extends Fragment {
     Button sirenStart;
     Button sirenStop;
     MediaPlayer mediaPlayer;
 
-    public sirenFragment() {
+    public SirenFragment() {
         // Required empty public constructor
     }
 

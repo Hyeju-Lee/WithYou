@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+        android:title="긴급번호 설정"
+        android:summary="긴급 상황시 문자를 보낼 번호를 설정합니다"
+        />
+    <SwitchPreference
+        android:title="흔들기"
+        android:key="shake"
+        android:defaultValue="false" />
+    <ListPreference
+        android:key="siren sound"
+        android:title="사이렌 소리"
+        android:defaultValue="police"
+        android:entries="@array/sirensound"
+        android:entryValues="@array/sirensound_value"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null">
+    </ListPreference>
+
+</PreferenceScreen>

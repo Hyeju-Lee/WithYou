@@ -3,26 +3,17 @@ package smu.techtown.withyou;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import smu.techtown.withyou.Fragment.homeFragment;
-import smu.techtown.withyou.Fragment.naviFragment;
-import smu.techtown.withyou.Fragment.settingFragment;
-import smu.techtown.withyou.Fragment.sirenFragment;
-import smu.techtown.withyou.Fragment.taxiFragment;
+import smu.techtown.withyou.Fragment.HomeFragment;
+import smu.techtown.withyou.Fragment.NaviFragment;
+import smu.techtown.withyou.Fragment.SettingFragment;
+import smu.techtown.withyou.Fragment.SirenFragment;
+import smu.techtown.withyou.Fragment.TaxiFragment;
 
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
 import android.os.Bundle;
-import android.util.Base64;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import net.daum.mf.map.api.MapView;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -44,11 +35,11 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.home);
         bottomNavigationView.setOnNavigationItemSelectedListener(doOnNavigationItemSelectedListener);
         //Fragment들 선언
-        homeFragment = new homeFragment();
-        taxiFragment = new taxiFragment();
-        sirenFragment = new sirenFragment();
-        naviFragment = new naviFragment();
-        settingFragment = new settingFragment();
+        homeFragment = new HomeFragment();
+        taxiFragment = new TaxiFragment();
+        sirenFragment = new SirenFragment();
+        naviFragment = new NaviFragment();
+        settingFragment = new SettingFragment();
         //첫 화면은 home으로 보이도록
         getSupportFragmentManager().beginTransaction().replace(R.id.mainFrame,homeFragment).commit();
 
