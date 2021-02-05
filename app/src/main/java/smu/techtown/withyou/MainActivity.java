@@ -2,6 +2,8 @@ package smu.techtown.withyou;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import smu.techtown.withyou.Fragment.HomeFragment;
 import smu.techtown.withyou.Fragment.NaviFragment;
@@ -9,6 +11,8 @@ import smu.techtown.withyou.Fragment.SettingFragment;
 import smu.techtown.withyou.Fragment.SirenFragment;
 import smu.techtown.withyou.Fragment.TaxiFragment;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -52,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        checkDangerousPermissions();
         //아래 탭 보여주기
         bottomNavigationView = findViewById(R.id.navigationView);
         menu=bottomNavigationView.getMenu();
@@ -156,6 +161,45 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 lastX = event.values[0];
                 lastY = event.values[1];
                 lastZ = event.values[2];
+            }
+        }
+    }
+
+    private void checkDangerousPermissions(){
+        String[] permissions = {//접근 권한 확인
+                Manifest.permission.SEND_SMS
+        };
+        int permissionCheck = PackageManager.PERMISSION_GRANTED;
+        for(int i=0; i<permissions.length;i++){
+            permissionCheck = ContextCompat.checkSelfPermission(this,permissions[i]);
+            if(permissionCheck == PackageManager.PERMISSION_DENIED){
+                break;
+            }
+        }
+
+        if(permissionCheck==PackageManager.PERMISSION_GRANTED){
+            Toast.makeText(this,"권한 있음",Toast.LENGTH_LONG).show();
+        }
+        else{
+            Toast.makeText(this,"권한 없음",Toast.LENGTH_LONG).show();
+            if(ActivityCompat.shouldShowRequestPermissionRationale(this,permissions[0])){
+                Toast.makeText(this,"권한 설명 필요함",Toast.LENGTH_LONG).show();
+            }else {
+                ActivityCompat.requestPermissions(this,permissions,1);
+            }
+        }
+    }
+    public void onRequestPermissionsResult(int requestCode,String[] permissions,
+                                           int[] grantResults){
+        if(requestCode == 1){
+            for(int i=0;i<permissions.length;i++){
+                if(grantResults[i] == PackageManager.PERMISSION_GRANTED){
+                    Toast.makeText(this,permissions[i]+"권한이 승인됨",
+                            Toast.LENGTH_LONG).show();
+                }else{
+                    Toast.makeText(this,permissions[i]+"권한이 승인되지 않음",
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
     }
