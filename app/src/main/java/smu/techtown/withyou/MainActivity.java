@@ -17,13 +17,17 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import static android.content.ContentValues.TAG;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -44,13 +48,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float speed;
     private float lastX, lastY, lastZ;
     private float x, y, z;
-
-    int shakeCount = 0;
-    int count = shakeCount;
-
-
     private SensorManager sensorManager;
     private Sensor accelerometerSensor;
+    MediaPlayer mediaPlayer;
+
+    long[] timeArray = {0,0,0,0,0,0,0,0,0,0};
+    int i = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         menu=bottomNavigationView.getMenu();
         bottomNavigationView.setSelectedItemId(R.id.home);
         bottomNavigationView.setOnNavigationItemSelectedListener(doOnNavigationItemSelectedListener);
-        //Fragment들 선언
+
         homeFragment = new HomeFragment();
         taxiFragment = new TaxiFragment();
         sirenFragment = new SirenFragment();
@@ -115,7 +118,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             backPressedTime = tempTime;
             Toast.makeText(getApplicationContext(),"한번 더 누르면 종료",Toast.LENGTH_SHORT).show();
         }
-
     }
     // 휴대폰 흔들면 event 발생
     @Override
@@ -124,8 +126,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (accelerometerSensor != null)
             sensorManager.registerListener(this, accelerometerSensor,
                     SensorManager.SENSOR_DELAY_GAME);
-
-
     }
 
     @Override
@@ -133,7 +133,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onStop();
         if (sensorManager != null)
             sensorManager.unregisterListener(this);
-
     }
 
     @Override
@@ -154,8 +153,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 speed = Math.abs(x + y + z - lastX - lastY - lastZ)
                         / gabOfTime * 10000;
                 if(speed > SHAKE_THRESHOLD) { //흔들림 감지되는 경우
-                    shakeCount = count++;
-                    Toast.makeText(getApplicationContext(),"와아아아",Toast.LENGTH_SHORT).show();
+                    timeArray[i] = currentTime;
+                    Log.d(TAG,"current time"+timeArray[i]+"array num:"+i);
+                    if(i != 9){
+                        long countGab = timeArray[i] - timeArray[i+1];
+                        if(countGab > 0 && countGab < 5000){
+                            mediaPlayer = MediaPlayer.create(this,R.raw.policesiren);
+                            mediaPlayer.start();
+                        }
+                    }
+                    else {
+                        long countGab = timeArray[9] - timeArray[0];
+                        if(0 <  countGab && countGab <5000){
+                            mediaPlayer = MediaPlayer.create(this,R.raw.policesiren);
+                            mediaPlayer.start();
+                        }
+                    }
+                    if(i>=0 && i<9){
+                        i++;
+                    }
+                    else
+                        i = 0;
                 }
 
                 lastX = event.values[0];
