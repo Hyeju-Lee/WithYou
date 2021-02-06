@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import smu.techtown.withyou.PreferenceManager;
 import smu.techtown.withyou.R;
 
 import android.preference.EditTextPreference;
@@ -34,6 +35,7 @@ public class SettingFragment extends Fragment {
 
         public static EditTextPreference phoneNumEditText;
         private PreferenceScreen screen;
+        String phoneNumber;
 
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,7 +44,10 @@ public class SettingFragment extends Fragment {
 
             screen = getPreferenceScreen();
             phoneNumEditText = (EditTextPreference)screen.findPreference(editTextKey);
+            phoneNumber = phoneNumEditText.getText();
+            PreferenceManager.setString(getActivity(),"phone number",phoneNumber);
             phoneNumEditText.setOnPreferenceChangeListener(this);
+
         }
 
         @Override

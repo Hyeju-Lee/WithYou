@@ -4,6 +4,7 @@ package smu.techtown.withyou.Fragment;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import smu.techtown.withyou.PreferenceManager;
 import smu.techtown.withyou.R;
 
 import android.telephony.SmsManager;
@@ -32,6 +33,7 @@ public class TaxiFragment extends Fragment {
 
     SmsManager smsManager;
     String taxiMessage;
+    String phoneNumber;
 
     int onOff= 1;
 
@@ -128,8 +130,9 @@ public class TaxiFragment extends Fragment {
     }
 
     public void sendTaxiMessage(){
+        phoneNumber = PreferenceManager.getString(getActivity(),"phone number");
         smsManager = SmsManager.getDefault();
-        smsManager.sendTextMessage("5554", null, taxiMessage,
+        smsManager.sendTextMessage(phoneNumber, null, taxiMessage,
                 null,null);
     }
 
