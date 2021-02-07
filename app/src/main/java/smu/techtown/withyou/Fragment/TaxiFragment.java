@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -70,13 +71,12 @@ public class TaxiFragment extends Fragment {
         firstTaxiEditText = (EditText)view.findViewById(R.id.firstTaxiNum);
         lastTaxiEditText = (EditText)view.findViewById(R.id.lastTaxiNum);
 
-        //승차 버튼
         TaxiBtn = (Button)view.findViewById(R.id.TaxiBtn);
         TaxiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 switch (onOff){
-                    case 0:
+                    case 0: //하차버튼 클릭 시
                         makeTaxiMessage(onOff);
                         sendTaxiMessage();
                         TaxiBtn.setText("승   차");
@@ -87,11 +87,14 @@ public class TaxiFragment extends Fragment {
                         minSpinner.setSelection(0);
                         onOff = 1;
                         break;
-                    case 1:
+                    case 1: //승차버튼 클릭시
                         makeTaxiMessage(onOff);
-                        sendTaxiMessage();
-                        TaxiBtn.setText("하   차");
-                        onOff = 0;
+                        if(sendTaxiMessage()){
+                            TaxiBtn.setText("하   차");
+                            onOff = 0;
+                        }
+                        else
+                            onOff = 1;
                         break;
                 }
             }
@@ -129,11 +132,19 @@ public class TaxiFragment extends Fragment {
 
     }
 
-    public void sendTaxiMessage(){
-        phoneNumber = PreferenceManager.getString(getActivity(),"phone number");
-        smsManager = SmsManager.getDefault();
-        smsManager.sendTextMessage(phoneNumber, null, taxiMessage,
-                null,null);
+    public boolean sendTaxiMessage(){
+        try{
+            phoneNumber = PreferenceManager.getString(getActivity(),"phone number");
+            smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(phoneNumber, null, taxiMessage,
+                    null,null);
+            Toast.makeText(getActivity(),"메시지 전송 성공",Toast.LENGTH_SHORT).show();
+            return true;
+        }catch (IllegalArgumentException e){
+            Toast.makeText(getActivity(),"긴급 번호를 설정해주세요",Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
     }
 
 }

@@ -154,7 +154,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         / gabOfTime * 10000;
                 if(speed > SHAKE_THRESHOLD) { //흔들림 감지되는 경우
                     timeArray[i] = currentTime;
-                    Log.d(TAG,"current time"+timeArray[i]+"array num:"+i);
                     if(i != 9){
                         long countGab = timeArray[i] - timeArray[i+1];
                         if(countGab > 0 && countGab < 5000){

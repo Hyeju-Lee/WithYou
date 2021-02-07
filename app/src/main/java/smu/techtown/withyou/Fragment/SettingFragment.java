@@ -15,6 +15,7 @@ import android.preference.PreferenceScreen;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 
 /**
@@ -44,8 +45,6 @@ public class SettingFragment extends Fragment {
 
             screen = getPreferenceScreen();
             phoneNumEditText = (EditTextPreference)screen.findPreference(editTextKey);
-            phoneNumber = phoneNumEditText.getText();
-            PreferenceManager.setString(getActivity(),"phone number",phoneNumber);
             phoneNumEditText.setOnPreferenceChangeListener(this);
 
         }
@@ -53,9 +52,10 @@ public class SettingFragment extends Fragment {
         @Override
         public boolean onPreferenceChange(Preference preference, Object newValue) {
             String value = (String)newValue;
-            if(preference == phoneNumEditText)
+            if(preference == phoneNumEditText) {
+                PreferenceManager.setString(getActivity(), "phone number", value);
                 phoneNumEditText.setSummary(value);
-
+            }
             return true;
         }
 
