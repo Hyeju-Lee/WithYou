@@ -1,10 +1,12 @@
 package smu.techtown.withyou.Fragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import smu.techtown.withyou.PasswordActivity;
 import smu.techtown.withyou.PreferenceManager;
 import smu.techtown.withyou.R;
 
@@ -33,10 +35,11 @@ public class SettingFragment extends Fragment {
 
     public static class MyPreferenceFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener {
         public static final String editTextKey = "phoneNumber";
+        public static final String preferenceKey = "password";
 
         public static EditTextPreference phoneNumEditText;
+        Preference passwordPreference;
         private PreferenceScreen screen;
-        String phoneNumber;
 
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,7 +49,7 @@ public class SettingFragment extends Fragment {
             screen = getPreferenceScreen();
             phoneNumEditText = (EditTextPreference)screen.findPreference(editTextKey);
             phoneNumEditText.setOnPreferenceChangeListener(this);
-
+            passwordPreference = screen.findPreference(preferenceKey);
         }
 
         @Override
@@ -57,6 +60,22 @@ public class SettingFragment extends Fragment {
                 phoneNumEditText.setSummary(value);
             }
             return true;
+        }
+
+        @Override
+        public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+            if(preference == passwordPreference){
+                Intent intent = new Intent(getActivity(), PasswordActivity.class);
+                if(PreferenceManager.getString(getActivity(),"password").equals("")){ //설정된 비밀번호 없을때
+                    intent.putExtra("pw","not exist");
+                }
+                else {
+                    intent.putExtra("pw","exist");
+                }
+                startActivity(intent);
+                return true;
+            }
+            return false;
         }
 
         public void onResume(){
