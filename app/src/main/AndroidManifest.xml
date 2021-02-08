@@ -17,6 +17,8 @@
         android:usesCleartextTraffic="true">
         <activity android:name=".PasswordActivity"
             android:theme="@android:style/Theme.Dialog"></activity>
+        <activity android:name=".SirenOffActivity"
+            android:theme="@android:style/Theme.Dialog"></activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,6 +1,7 @@
 package smu.techtown.withyou;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -12,6 +13,7 @@ import smu.techtown.withyou.Fragment.SirenFragment;
 import smu.techtown.withyou.Fragment.TaxiFragment;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -33,6 +35,7 @@ import static android.content.ContentValues.TAG;
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
     private final long FINISH_INTERVAL_TIME = 2000;//for 뒤로 가기 버튼 이벤트
     private static final int SHAKE_THRESHOLD = 1000;
+    public static final int REQUEST_CODE = 1;
     private long backPressedTime = 0;
 
     BottomNavigationView bottomNavigationView;
@@ -52,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor accelerometerSensor;
     MediaPlayer mediaPlayer;
 
-    long[] timeArray = {0,0,0,0,0,0,0,0,0,0};
+    long[] timeArray;
     int i = 0;
 
     @Override
@@ -77,6 +80,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
+        timeArray = new long[10];
+        for(int j = 0; j < 10; j++)
+            timeArray[j] = 0;
     }
 
     //탭 선택에 따라 fragment들을 바꿔가며 보여준다
@@ -157,15 +163,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     if(i != 9){
                         long countGab = timeArray[i] - timeArray[i+1];
                         if(countGab > 0 && countGab < 5000){
+                            for(int j = 0; j < 10; j++)
+                                timeArray[j] = 0; //mediaplayer 중복 재생 방지
                             mediaPlayer = MediaPlayer.create(this,R.raw.policesiren);
                             mediaPlayer.start();
+                            showPasswordPopup();
                         }
                     }
                     else {
                         long countGab = timeArray[9] - timeArray[0];
                         if(0 <  countGab && countGab <5000){
+                            for(int j = 0; j < 10; j++)
+                                timeArray[j] = 0; //mediaplayer 중복 재생 방지
                             mediaPlayer = MediaPlayer.create(this,R.raw.policesiren);
                             mediaPlayer.start();
+                            showPasswordPopup();
                         }
                     }
                     if(i>=0 && i<9){
@@ -178,6 +190,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 lastX = event.values[0];
                 lastY = event.values[1];
                 lastZ = event.values[2];
+            }
+        }
+    }
+
+    public void showPasswordPopup() {
+        Intent intent = new Intent(this, SirenOffActivity.class);
+        startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == REQUEST_CODE) {
+            if(resultCode == RESULT_OK) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
             }
         }
     }
