@@ -3,6 +3,7 @@ package smu.techtown.withyou.Fragment;
 
 import android.Manifest;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -18,6 +19,14 @@ import android.view.ViewGroup;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.concurrent.ExecutionException;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -26,9 +35,6 @@ public class HomeFragment extends Fragment implements MapView.CurrentLocationEve
     View view;
     MapView mapView;
     ViewGroup mapViewContainer;
-    private static final int GPS_ENABLE_REQUEST_CODE = 2001;
-    private static final int PERMISSIONS_REQUEST_CODE = 100;
-    String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -42,9 +48,51 @@ public class HomeFragment extends Fragment implements MapView.CurrentLocationEve
         mapView.setMapViewEventListener(this);
         mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
 
+        try {
+            String str = new Task().execute().get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         return view;
 
     }
+
+    public class Task extends AsyncTask<String, Void, String> {
+        String receiveMsg,str;
+
+        @Override
+        protected String doInBackground(String... strings) {
+            URL url = null;
+            try {
+                url = new URL("http://openapi.seoul.go.kr:8088/55685865646861653132327657644a47/json/womanSafeAreaInfo/1/5/");
+                HttpURLConnection httpURLConnection = (HttpURLConnection)url.openConnection();
+
+                if(httpURLConnection.getResponseCode() == httpURLConnection.HTTP_OK) {
+                    InputStreamReader inputStreamReader = new InputStreamReader(httpURLConnection.getInputStream(), "UTF-8");
+                    BufferedReader reader = new BufferedReader(inputStreamReader);
+                    StringBuffer buffer = new StringBuffer();
+                    while ((str = reader.readLine()) != null){
+                        buffer.append(str);
+                    }
+                    receiveMsg = buffer.toString();
+                    Log.i("receiveMsg: ", receiveMsg);
+                    reader.close();
+                }
+                else{
+                    Log.i("통신",httpURLConnection.getResponseCode()+"에러");
+                }
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return receiveMsg;
+        }
+    }
+
 
     @Override
     public void onDestroy() {
@@ -54,7 +102,7 @@ public class HomeFragment extends Fragment implements MapView.CurrentLocationEve
 
     @Override
     public void onCurrentLocationUpdate(MapView mapView, MapPoint mapPoint, float v) {
-        MapPoint.GeoCoordinate mapPointGeo = mapPoint.getMapPointGeoCoord();
+        //MapPoint.GeoCoordinate mapPointGeo = mapPoint.getMapPointGeoCoord();
     }
 
     @Override
