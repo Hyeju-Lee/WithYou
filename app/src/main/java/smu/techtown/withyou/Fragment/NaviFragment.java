@@ -16,6 +16,7 @@ import android.os.Bundle;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import smu.techtown.withyou.MainActivity;
 import smu.techtown.withyou.PreferenceManager;
 import smu.techtown.withyou.R;
 
@@ -41,6 +42,40 @@ public class NaviFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_navi, container, false);
+
+        getCurrentLocation();
+        String currentLatitude = Double.toString(latitude);
+        String currentLongitude = Double.toString(longitude);
+        String destinationLatitude = PreferenceManager.getString(getActivity(),"destination latitude");
+        String destinationLongitude = PreferenceManager.getString(getActivity(), "destination longitude");
+        String url = "kakaomap://route?sp=" + currentLatitude + "," + currentLongitude
+                + "&ep=" + destinationLatitude + "," + destinationLongitude + "&by=FOOT";
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(intent);
+
+        MainActivity.bottomNavigationView.setSelectedItemId(R.id.home);
+
+        return  view;
+    }
+
+    final LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            latitude = location.getLatitude();
+            longitude = location.getLongitude();
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+        @Override
+        public void onProviderEnabled(String provider) {}
+
+        @Override
+        public void onProviderDisabled(String provider) {}
+    };
+
+    public void getCurrentLocation() {
         locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
         if (ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(getActivity(),Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -56,34 +91,6 @@ public class NaviFragment extends Fragment {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,1000,1,
                     locationListener);
         }
-
-        String currentLatitude = Double.toString(latitude);
-        String currentLongitude = Double.toString(longitude);
-        String url = "kakaomap://route?sp="+currentLatitude+","+currentLongitude+"&ep=37.4979502,127.0276368&by=FOOT";
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        startActivity(intent);
-
-        return  view;
     }
-
-    final LocationListener locationListener = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-            latitude = location.getLatitude();
-            longitude = location.getLongitude();
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-        }
-    };
 
 }

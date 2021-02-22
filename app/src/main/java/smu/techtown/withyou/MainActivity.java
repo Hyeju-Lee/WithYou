@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static final int REQUEST_CODE = 1;
     private long backPressedTime = 0;
 
-    BottomNavigationView bottomNavigationView;
+    public static BottomNavigationView bottomNavigationView;
     Menu menu;
     Fragment homeFragment;
     Fragment sirenFragment;
