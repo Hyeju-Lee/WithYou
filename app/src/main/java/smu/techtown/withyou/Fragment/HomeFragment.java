@@ -3,7 +3,6 @@ package smu.techtown.withyou.Fragment;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -11,12 +10,10 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import smu.techtown.withyou.JSONData;
-import smu.techtown.withyou.MainActivity;
 import smu.techtown.withyou.PreferenceManager;
 import smu.techtown.withyou.R;
 
@@ -25,8 +22,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
+import com.opencsv.CSVReader;
 
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
@@ -39,12 +36,12 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 
@@ -55,8 +52,8 @@ public class HomeFragment extends Fragment {
     View view;
     MapView mapView;
     ViewGroup mapViewContainer;
-    Double latitude;
-    Double longitude;
+    Double safeAreaLatitude;
+    Double safeAreaLongitude;
 
     LocationManager locationManager;
     Location location;
@@ -66,6 +63,9 @@ public class HomeFragment extends Fragment {
     float minDistance = 10000;
     Double destinationLatitude;
     Double destinationLongitude;
+    Double policeLatitude;
+    Double policeLongitude;
+    String policeName;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -132,12 +132,13 @@ public class HomeFragment extends Fragment {
                     continue;
                 }
                 else {
-                    latitude = Double.parseDouble(safeAreaLocation.get(i).getLatitude());
-                    longitude = Double.parseDouble(safeAreaLocation.get(i).getLongitude());
-                    MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(latitude,longitude);
+                    safeAreaLatitude = Double.parseDouble(safeAreaLocation.get(i).getLatitude());
+                    safeAreaLongitude = Double.parseDouble(safeAreaLocation.get(i).getLongitude());
+                    MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(safeAreaLatitude,safeAreaLongitude);
                     MapPOIItem marker = new MapPOIItem();
                     marker.setItemName(safeAreaLocation.get(i).getStorNm());
                     marker.setMapPoint(mapPoint);
+                    marker.setMarkerType(MapPOIItem.MarkerType.YellowPin);
                     marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
                     mapView.addPOIItem(marker);
 
@@ -146,16 +147,41 @@ public class HomeFragment extends Fragment {
                     startPoint.setLongitude(currentLongitude);
 
                     Location destination = new Location("destination");
-                    destination.setLatitude(latitude);
-                    destination.setLongitude(longitude);
+                    destination.setLatitude(safeAreaLatitude);
+                    destination.setLongitude(safeAreaLongitude);
 
                     distance = startPoint.distanceTo(destination);
                     if(distance < minDistance) {
                         minDistance = distance;
-                        destinationLatitude = latitude;
-                        destinationLongitude = longitude;
+                        destinationLatitude = safeAreaLatitude;
+                        destinationLongitude = safeAreaLongitude;
                     }
                 }
+            }
+
+            try{
+                InputStreamReader inputStreamReader = new InputStreamReader(getResources().openRawResource(R.raw.policelocation), "euc-kr");
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                CSVReader csvReader = new CSVReader(bufferedReader);
+                String[] nextLine;
+                csvReader.readNext();
+                while ((nextLine = csvReader.readNext()) != null) {
+                    for(int i = 0; i < nextLine.length;i++) {
+                        policeLongitude = Double.parseDouble(nextLine[3]);
+                        policeLatitude = Double.parseDouble(nextLine[4]);
+                        policeName = nextLine[2];
+                        Log.i("string",Double.toString(policeLatitude));
+                        MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(policeLatitude,policeLongitude);
+                        MapPOIItem policeMarker = new MapPOIItem();
+                        policeMarker.setItemName(policeName);
+                        policeMarker.setMapPoint(mapPoint);
+                        policeMarker.setMarkerType(MapPOIItem.MarkerType.RedPin);
+                        policeMarker.setSelectedMarkerType(MapPOIItem.MarkerType.YellowPin);
+                        mapView.addPOIItem(policeMarker);
+                    }
+                }
+            }catch (IOException e){
+                e.printStackTrace();
             }
 
             PreferenceManager.setString(getActivity(), "destination latitude", Double.toString(destinationLatitude));
@@ -264,5 +290,4 @@ public class HomeFragment extends Fragment {
             return receiveMsg;
         }
     }
-
 }
