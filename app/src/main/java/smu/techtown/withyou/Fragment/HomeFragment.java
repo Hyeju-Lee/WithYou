@@ -3,6 +3,7 @@ package smu.techtown.withyou.Fragment;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -14,6 +15,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import smu.techtown.withyou.JSONData;
+import smu.techtown.withyou.MessageActivity;
 import smu.techtown.withyou.PreferenceManager;
 import smu.techtown.withyou.R;
 
@@ -21,6 +23,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.google.gson.Gson;
 import com.opencsv.CSVReader;
@@ -52,6 +55,7 @@ public class HomeFragment extends Fragment {
     View view;
     MapView mapView;
     ViewGroup mapViewContainer;
+    Button messageButton;
     Double safeAreaLatitude;
     Double safeAreaLongitude;
 
@@ -80,6 +84,15 @@ public class HomeFragment extends Fragment {
         getCurrentLocation();
         Marker marker = new Marker();
         marker.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        messageButton = (Button)view.findViewById(R.id.messageButton);
+        messageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), MessageActivity.class);
+                startActivity(intent);
+            }
+        });
 
         return view;
     }
@@ -170,7 +183,6 @@ public class HomeFragment extends Fragment {
                         policeLongitude = Double.parseDouble(nextLine[3]);
                         policeLatitude = Double.parseDouble(nextLine[4]);
                         policeName = nextLine[2];
-                        Log.i("string",Double.toString(policeLatitude));
                         MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(policeLatitude,policeLongitude);
                         MapPOIItem policeMarker = new MapPOIItem();
                         policeMarker.setItemName(policeName);
