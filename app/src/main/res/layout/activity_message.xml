@@ -14,7 +14,7 @@
             android:textSize="15dp"
             android:textColor="#000"
             android:alpha="0.87"
-            android:text="긴급 메시지가 전송됩니다."
+            android:text="녹음이 시작되었습니다."
             android:gravity="center"
             android:layout_marginBottom="3dp"
             android:layout_width="match_parent"

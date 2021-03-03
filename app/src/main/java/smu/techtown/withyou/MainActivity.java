@@ -214,7 +214,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void checkDangerousPermissions(){
         String[] permissions = {//접근 권한 확인
                 Manifest.permission.SEND_SMS,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
         };
         int permissionCheck = PackageManager.PERMISSION_GRANTED;
         for(int i=0; i<permissions.length;i++){

@@ -13,15 +13,21 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import net.daum.mf.map.api.MapPoint;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -31,12 +37,16 @@ public class MessageActivity extends Activity {
     Location location;
     double currentLatitude;
     double currentLongitude;
+    MediaRecorder mediaRecorder;
+    Handler handler;
+    TextView messageTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_message);
+        messageTextView = (TextView)findViewById(R.id.messageTextView);
 
         Button closeButton = (Button)findViewById(R.id.closeBtn);
         closeButton.setOnClickListener(new View.OnClickListener() {
@@ -57,7 +67,18 @@ public class MessageActivity extends Activity {
             Log.i("here","실패");
         }
 
+        File file = Environment.getExternalStorageDirectory();
+        String fileName = file.getAbsolutePath()+"/"+"record.mp3";
+        startRecording(fileName);
 
+        handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                stopRecording();
+                messageTextView.setText("녹음이 완료되었습니다.\n긴급 문자가 전송되었습니다.");
+            }
+        },5000);
 
     }
 
@@ -96,6 +117,27 @@ public class MessageActivity extends Activity {
         public void onProviderDisabled(String provider) {}
     };
 
+    private void startRecording(String fileName) {
+        mediaRecorder = new MediaRecorder();
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);//압축 형식 설정
+        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        mediaRecorder.setOutputFile(fileName);
+        try{
+            mediaRecorder.prepare();
+            mediaRecorder.start();
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void stopRecording() {
+        if(mediaRecorder != null) {
+            mediaRecorder.stop();
+            mediaRecorder.release();
+            mediaRecorder = null;
+        }
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -105,9 +147,4 @@ public class MessageActivity extends Activity {
         return true;
     }
 
-    @Override
-    public void onBackPressed() {
-        //백버튼 막기
-        return;
-    }
 }
