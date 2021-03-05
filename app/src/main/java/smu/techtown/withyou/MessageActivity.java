@@ -7,21 +7,29 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.hardware.Camera;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +48,8 @@ public class MessageActivity extends Activity {
     MediaRecorder mediaRecorder;
     Handler handler;
     TextView messageTextView;
+    CameraSurfaceView cameraSurfaceView;
+    FrameLayout previewFrame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +88,19 @@ public class MessageActivity extends Activity {
                 stopRecording();
                 messageTextView.setText("녹음이 완료되었습니다.\n긴급 문자가 전송되었습니다.");
             }
-        },5000);
+        },10000);
+
+        previewFrame = findViewById(R.id.previewFrame);
+        cameraSurfaceView = new CameraSurfaceView(this);
+        previewFrame.addView(cameraSurfaceView);
+
+        Button captureBtn = findViewById(R.id.captureBtn);
+        captureBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                takePicture();
+            }
+        });
 
     }
 
@@ -137,6 +159,36 @@ public class MessageActivity extends Activity {
             mediaRecorder.release();
             mediaRecorder = null;
         }
+    }
+
+    public void takePicture() {
+        cameraSurfaceView.capture(new Camera.PictureCallback() {
+            @Override
+            public void onPictureTaken(byte[] data, Camera camera) {
+                try {
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                    Bitmap resultBitmap = null;
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(90); //갤러리 사진 회전
+                    resultBitmap = Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight()
+                    ,matrix,true);
+                    String outUriStr = MediaStore.Images.Media.insertImage(
+                            getContentResolver(),resultBitmap,"image","image");
+                    if(outUriStr == null) {
+                        Log.d("capture", "image insert failed");
+                        return;
+                    } else {
+                        Uri outUri = Uri.parse(outUriStr);
+                        sendBroadcast(new Intent(
+                                Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, outUri
+                        ));
+                    }
+                    camera.startPreview();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override

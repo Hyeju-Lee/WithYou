@@ -217,7 +217,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA
         };
         int permissionCheck = PackageManager.PERMISSION_GRANTED;
         for(int i=0; i<permissions.length;i++){
@@ -228,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         if(permissionCheck==PackageManager.PERMISSION_GRANTED){
-            Toast.makeText(this,"권한 있음",Toast.LENGTH_LONG).show();
+
         }
         else{
             Toast.makeText(this,"권한 없음",Toast.LENGTH_LONG).show();
