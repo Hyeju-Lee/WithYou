@@ -23,6 +23,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -67,6 +68,7 @@ public class MessageActivity extends Activity {
     Bitmap resultBitmap;
 
     Uri audioUri;
+    public static int num = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,18 +100,9 @@ public class MessageActivity extends Activity {
             Log.i("here","실패");
         }
 
-        File file = Environment.getExternalStorageDirectory();
-        fileName = file.getAbsolutePath()+"/record.mp3";
-        startRecording();
-
         handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                stopRecording();
-                messageTextView.setText("녹음이 완료되었습니다.");
-            }
-        },10000);
+        Recording recording = new Recording();
+        recording.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         previewFrame = findViewById(R.id.previewFrame);
         cameraSurfaceView = new CameraSurfaceView(this);
@@ -132,6 +125,58 @@ public class MessageActivity extends Activity {
             }
         });
 
+    }
+
+    public class Recording extends AsyncTask<Void,Void,Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            File file = Environment.getExternalStorageDirectory();
+            fileName = file.getAbsolutePath() + "/record" + num + ".mp3";
+            startRecording();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    stopRecording();
+                    messageTextView.setText("녹음이 완료되었습니다.");
+                }
+            },10000);
+
+            return null;
+        }
+    }
+
+    private void startRecording() {
+        mediaRecorder = new MediaRecorder();
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+        mediaRecorder.setOutputFile(fileName);
+        try{
+            mediaRecorder.prepare();
+            mediaRecorder.start();
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void stopRecording() {
+        if(mediaRecorder != null) {
+            mediaRecorder.stop();
+            mediaRecorder.release();
+            mediaRecorder = null;
+            ContentValues values = new ContentValues(5);
+            values.put(MediaStore.MediaColumns.TITLE, "Recorded");
+            values.put(MediaStore.Audio.Media.DISPLAY_NAME,"Recorded Audio");
+            values.put(MediaStore.MediaColumns.DATE_ADDED, System.currentTimeMillis()/1000);
+            values.put(MediaStore.MediaColumns.MIME_TYPE, "audio/mp4"); //미디어 파일의 포멧
+            values.put(MediaStore.Audio.Media.DATA, fileName);
+            audioUri = getContentResolver().insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,values);
+            if(audioUri == null)
+                Log.i("야야","실패");
+            num += 1;
+            sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,audioUri));
+
+        }
     }
 
     public void getCurrentLocation() {
@@ -168,39 +213,6 @@ public class MessageActivity extends Activity {
         @Override
         public void onProviderDisabled(String provider) {}
     };
-
-    private void startRecording() {
-        mediaRecorder = new MediaRecorder();
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-        mediaRecorder.setOutputFile(fileName);
-        try{
-            mediaRecorder.prepare();
-            mediaRecorder.start();
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void stopRecording() {
-        if(mediaRecorder != null) {
-            mediaRecorder.stop();
-            mediaRecorder.release();
-            mediaRecorder = null;
-            ContentValues values = new ContentValues(6);
-            values.put(MediaStore.MediaColumns.TITLE, "Recorded");
-            values.put(MediaStore.Audio.Media.DISPLAY_NAME,"Recorded Audio");
-            values.put(MediaStore.MediaColumns.DATE_ADDED, System.currentTimeMillis()/1000);
-            values.put(MediaStore.MediaColumns.MIME_TYPE, "audio/mp4"); //미디어 파일의 포멧
-            values.put(MediaStore.Audio.Media.DATA, fileName);
-            audioUri = getContentResolver().insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,values);
-            if(audioUri == null)
-                Log.i("야야","실패");
-            sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,audioUri));
-
-        }
-    }
 
     public void takePicture() {
         cameraSurfaceView.capture(new Camera.PictureCallback() {
@@ -264,10 +276,10 @@ public class MessageActivity extends Activity {
         startActivity(intent);*/
 
         Intent intent = new Intent(Intent.ACTION_SEND);
-        //intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.putExtra("address",phoneNumber);
-        intent.putExtra(Intent.EXTRA_STREAM,outUri);
-        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_STREAM,audioUri);
+        intent.setType("audio/*");
         startActivity(intent);
 
         //intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
