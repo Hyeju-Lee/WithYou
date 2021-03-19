@@ -2,6 +2,7 @@ package smu.techtown.withyou;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.ShareCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
@@ -39,11 +40,13 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import net.daum.mf.map.api.MapPoint;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,6 +65,7 @@ public class MessageActivity extends Activity {
     SmsManager smsManager;
     List<Address> addresses;
     String phoneNumber;
+    Button sendBtn;
 
     Uri outUri;
     String fileName;
@@ -78,6 +82,8 @@ public class MessageActivity extends Activity {
         messageTextView = (TextView)findViewById(R.id.messageTextView);
         phoneNumber = PreferenceManager.getString(this,"phone number");
 
+        sendBtn = findViewById(R.id.sendBtn);
+        sendBtn.setText("녹음중입니다");
         Button closeButton = (Button)findViewById(R.id.closeBtn);
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,12 +122,12 @@ public class MessageActivity extends Activity {
             }
         });
 
-        Button sendBtn = findViewById(R.id.sendBtn);
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendFile();
-                //finish();
+                if(sendBtn.getText().equals("녹음 전송하기")) {
+                    sendFile();
+                }
             }
         });
 
@@ -138,6 +144,7 @@ public class MessageActivity extends Activity {
                 public void run() {
                     stopRecording();
                     messageTextView.setText("녹음이 완료되었습니다.");
+                    sendBtn.setText("녹음 전송하기");
                 }
             },10000);
 
@@ -241,12 +248,20 @@ public class MessageActivity extends Activity {
                 }
             }
         });
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.putExtra("address",phoneNumber);
+        intent.putExtra(Intent.EXTRA_STREAM,outUri);
+        intent.setType("image/*");
+        startActivity(intent);
+
     }
 
     private boolean sendLocation(){
         try{
             smsManager = SmsManager.getDefault();
             String address = addresses.get(0).getAddressLine(0);
+            PreferenceManager.setString(this,"address",address);
             smsManager.sendTextMessage(phoneNumber, null, address,
                     null,null);
             return true;
@@ -258,46 +273,35 @@ public class MessageActivity extends Activity {
     }
 
     private void sendFile() {
-        //ArrayList<Uri> uris = new ArrayList<>();
-        //uris.add(outUri);
-        //uris.add(audioUri);
+
+        /*ShareCompat.IntentBuilder shareIntent = ShareCompat.IntentBuilder
+                .from((Activity)this).setType("image/audio/*");
+        shareIntent.addStream(outUri);
+        shareIntent.addStream(audioUri);
+        //shareIntent.addEmailTo(phoneNumber);
+        Intent intent = shareIntent.getIntent();
+        intent.putExtra("address", phoneNumber); //전화번호만 첨부하면 ok
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(intent);*/
 
         /*Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_SEND);
+        intent.setAction(Intent.ACTION_SEND_MULTIPLE);
         intent.putExtra("address", phoneNumber);
-        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        intent.setType("image/*");
-        intent.putExtra(Intent.EXTRA_STREAM,outUri);
-        intent.setType("audio/*");
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
         String[] extraMimeTypes = {"image/*", "audio/*"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, extraMimeTypes);
-        intent.putExtra(Intent.EXTRA_STREAM,audioUri);
+        //intent.putExtra(Intent.EXTRA_STREAM,audioUri);
         startActivity(intent);*/
 
         Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        //intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.putExtra("address",phoneNumber);
         intent.putExtra(Intent.EXTRA_STREAM,audioUri);
         intent.setType("audio/*");
         startActivity(intent);
 
-        //intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-
-        /*Settings settings = new Settings();
-        com.klinker.android.send_message.Settings sendSettings = new com.klinker.android.send_message.Settings();
-        sendSettings.setMmsc(settings.getMmsc());
-        sendSettings.setProxy(settings.getProxy());
-        sendSettings.setPort(settings.getPort());
-        sendSettings.setUseSystemSending(true);
-        //settings.setUseSystemSending(true);
-        Transaction transaction = new Transaction(MessageActivity.this,sendSettings);
-        Message message = new Message("문자", phoneNumber);
-        //message.setImage(BitmapFactory.decodeResource(getResources(),R.drawable.taxi));
-        //message.addAudio();
-        transaction.sendNewMessage(message,Transaction.NO_THREAD_ID,new Bundle(),new Bundle());*/
     }
-
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {

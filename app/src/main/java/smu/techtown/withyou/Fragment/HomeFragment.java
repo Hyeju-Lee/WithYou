@@ -2,6 +2,7 @@ package smu.techtown.withyou.Fragment;
 
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -85,12 +86,22 @@ public class HomeFragment extends Fragment {
         Marker marker = new Marker();
         marker.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
+        final String phoneNumber = PreferenceManager.getString(getActivity(),"phone number");
+
         messageButton = (Button)view.findViewById(R.id.messageButton);
         messageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), MessageActivity.class);
-                startActivity(intent);
+                if(phoneNumber.equals("")) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle("긴급 번호 설정 필요").setMessage("setting 메뉴에서 번호를 입력해주세요");
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
+                }
+                else {
+                    Intent intent = new Intent(getActivity(), MessageActivity.class);
+                    startActivity(intent);
+                }
             }
         });
 
