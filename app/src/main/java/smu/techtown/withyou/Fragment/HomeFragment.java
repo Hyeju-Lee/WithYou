@@ -6,6 +6,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -46,6 +48,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 
@@ -71,6 +74,8 @@ public class HomeFragment extends Fragment {
     Double policeLatitude;
     Double policeLongitude;
     String policeName;
+    List <Address> addresses;
+    Geocoder geocoder;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -83,6 +88,15 @@ public class HomeFragment extends Fragment {
         mapViewContainer.addView(mapView);
 
         getCurrentLocation();
+        geocoder = new Geocoder(getActivity());
+        try {
+            addresses = geocoder.getFromLocation(
+                    currentLatitude,currentLongitude,1);
+            PreferenceManager.setString(getActivity(),"address",addresses.get(0).getAddressLine(0));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Log.i("here",addresses.get(0).getAddressLine(0));
         Marker marker = new Marker();
         marker.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 

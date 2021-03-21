@@ -13,6 +13,7 @@ import smu.techtown.withyou.Fragment.SirenFragment;
 import smu.techtown.withyou.Fragment.TaxiFragment;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -21,6 +22,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -55,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager sensorManager;
     private Sensor accelerometerSensor;
     MediaPlayer mediaPlayer;
+    SmsManager smsManager;
 
     long[] timeArray;
     int i = 0;
@@ -163,22 +166,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     timeArray[i] = currentTime;
                     if(i != 9){
                         long countGab = timeArray[i] - timeArray[i+1];
-                        if(countGab > 0 && countGab < 5000){
+                        if(countGab > 0 && countGab < 5000) {
                             for(int j = 0; j < 10; j++)
                                 timeArray[j] = 0; //mediaplayer 중복 재생 방지
-                            mediaPlayer = MediaPlayer.create(this,R.raw.policesiren);
-                            mediaPlayer.start();
-                            showPasswordPopup();
+                            if(isPasswordExist()) {
+                                mediaPlayer = MediaPlayer.create(this,R.raw.policesiren);
+                                mediaPlayer.start();
+                                showPasswordPopup();
+                                if(sendLocation())
+                                    Toast.makeText(this,"현재 위치가 전송되었습니다.",Toast.LENGTH_SHORT).show();
+                            }
                         }
                     }
                     else {
                         long countGab = timeArray[9] - timeArray[0];
-                        if(0 <  countGab && countGab <5000){
+                        if(0 <  countGab && countGab <5000) {
                             for(int j = 0; j < 10; j++)
                                 timeArray[j] = 0; //mediaplayer 중복 재생 방지
-                            mediaPlayer = MediaPlayer.create(this,R.raw.policesiren);
-                            mediaPlayer.start();
-                            showPasswordPopup();
+                            if(isPasswordExist()) {
+                                mediaPlayer = MediaPlayer.create(this,R.raw.policesiren);
+                                mediaPlayer.start();
+                                showPasswordPopup();
+                                if(sendLocation())
+                                    Toast.makeText(this,"현재 위치가 전송되었습니다.",Toast.LENGTH_SHORT).show();
+                            }
                         }
                     }
                     if(i>=0 && i<9){
@@ -192,6 +203,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 lastY = event.values[1];
                 lastZ = event.values[2];
             }
+        }
+    }
+
+    private boolean isPasswordExist() {
+        String password = PreferenceManager.getString(this,"password");
+        Log.i("비밀",password);
+        if(password.equals("")) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("비밀 번호 설정 필요").setMessage("setting 메뉴에서 비밀번호를 입력해주세요");
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+            return false;
+        }
+        else {
+            return true;
         }
     }
 
@@ -209,6 +235,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 mediaPlayer.release();
             }
         }
+    }
+
+    private boolean sendLocation(){
+        try{
+            String phoneNumber = PreferenceManager.getString(this, "phone number");
+            smsManager = SmsManager.getDefault();
+            String address = PreferenceManager.getString(this,"address");
+            smsManager.sendTextMessage(phoneNumber, null, address,
+                    null,null);
+            return true;
+        }catch (IllegalArgumentException e){
+            Toast.makeText(this,"긴급 번호를 설정해주세요",Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
     }
 
     private void checkDangerousPermissions(){
