@@ -14,6 +14,8 @@ import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.preference.SwitchPreference;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +42,7 @@ public class SettingFragment extends Fragment {
         public static EditTextPreference phoneNumEditText;
         Preference passwordPreference;
         private PreferenceScreen screen;
+        SwitchPreference shakePreference;
 
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,14 +53,21 @@ public class SettingFragment extends Fragment {
             phoneNumEditText = (EditTextPreference)screen.findPreference(editTextKey);
             phoneNumEditText.setOnPreferenceChangeListener(this);
             passwordPreference = screen.findPreference(preferenceKey);
+            shakePreference = (SwitchPreference)screen.findPreference("shake");
+            shakePreference.setOnPreferenceChangeListener(this);
         }
 
         @Override
         public boolean onPreferenceChange(Preference preference, Object newValue) {
-            String value = (String)newValue;
             if(preference == phoneNumEditText) {
+                String value = (String)newValue;
                 PreferenceManager.setString(getActivity(), "phone number", value);
                 phoneNumEditText.setSummary(value);
+            }
+            else if(preference == shakePreference) {
+                Boolean value = (Boolean)newValue;
+                PreferenceManager.setBoolean(getActivity(), "shake", value);
+                Log.i("shake",Boolean.toString(value));
             }
             return true;
         }

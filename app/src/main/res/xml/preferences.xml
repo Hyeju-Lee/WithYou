@@ -13,6 +13,7 @@
         />
     <SwitchPreference
         android:title="흔들기"
+        android:summary="흔들어서 사이렌을 출력하려면 켜주세요"
         android:key="shake"
         android:defaultValue="false" />
     <ListPreference

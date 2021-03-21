@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER && PreferenceManager.getBoolean(this,"shake")) {
             currentTime = System.currentTimeMillis();
             gabOfTime = (currentTime - lastTime);
             if(gabOfTime > 100) { //0.1sec
