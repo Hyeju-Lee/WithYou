@@ -11,6 +11,7 @@ import smu.techtown.withyou.PreferenceManager;
 import smu.techtown.withyou.R;
 
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
@@ -43,6 +44,7 @@ public class SettingFragment extends Fragment {
         Preference passwordPreference;
         private PreferenceScreen screen;
         SwitchPreference shakePreference;
+        ListPreference sirenListPreference;
 
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,6 +57,10 @@ public class SettingFragment extends Fragment {
             passwordPreference = screen.findPreference(preferenceKey);
             shakePreference = (SwitchPreference)screen.findPreference("shake");
             shakePreference.setOnPreferenceChangeListener(this);
+            sirenListPreference = (ListPreference)screen.findPreference("siren sound");
+            sirenListPreference.setDefaultValue("police");
+            PreferenceManager.setString(getActivity(), "sound", "police");
+            sirenListPreference.setOnPreferenceChangeListener(this);
         }
 
         @Override
@@ -68,6 +74,11 @@ public class SettingFragment extends Fragment {
                 Boolean value = (Boolean)newValue;
                 PreferenceManager.setBoolean(getActivity(), "shake", value);
                 Log.i("shake",Boolean.toString(value));
+            }
+            else if(preference == sirenListPreference) {
+                String value = (String)newValue;
+                Log.i("sound",value);
+                PreferenceManager.setString(getActivity(), "sound", value);
             }
             return true;
         }

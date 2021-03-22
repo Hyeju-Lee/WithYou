@@ -170,7 +170,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             for(int j = 0; j < 10; j++)
                                 timeArray[j] = 0; //mediaplayer 중복 재생 방지
                             if(isPasswordExist()) {
-                                mediaPlayer = MediaPlayer.create(this,R.raw.policesiren);
+                                String sound = PreferenceManager.getString(this, "sound");
+                                if(sound.equals(""))
+                                    mediaPlayer = MediaPlayer.create(this, R.raw.policesiren);
+                                else {
+                                    switch (sound) {
+                                        case "police":
+                                            mediaPlayer = MediaPlayer.create(this,R.raw.policesiren);
+                                            break;
+                                        case "fireStation":
+                                            mediaPlayer = MediaPlayer.create(this,R.raw.fire);
+                                            break;
+                                        case "ambulance":
+                                            mediaPlayer = MediaPlayer.create(this,R.raw.ambulance);
+                                            break;
+                                    }
+                                }
                                 mediaPlayer.start();
                                 showPasswordPopup();
                                 if(sendLocation())
@@ -184,7 +199,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             for(int j = 0; j < 10; j++)
                                 timeArray[j] = 0; //mediaplayer 중복 재생 방지
                             if(isPasswordExist()) {
-                                mediaPlayer = MediaPlayer.create(this,R.raw.policesiren);
+                                String sound = PreferenceManager.getString(this, "sound");
+                                if(sound.equals(""))
+                                    mediaPlayer = MediaPlayer.create(this, R.raw.policesiren);
+                                else {
+                                    switch (sound) {
+                                        case "police":
+                                            mediaPlayer = MediaPlayer.create(this,R.raw.policesiren);
+                                            break;
+                                        case "fireStation":
+                                            mediaPlayer = MediaPlayer.create(this,R.raw.fire);
+                                            break;
+                                        case "ambulance":
+                                            mediaPlayer = MediaPlayer.create(this,R.raw.ambulance);
+                                            break;
+                                    }
+                                }
                                 mediaPlayer.start();
                                 showPasswordPopup();
                                 if(sendLocation())
