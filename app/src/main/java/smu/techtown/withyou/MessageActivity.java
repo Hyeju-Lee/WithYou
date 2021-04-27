@@ -69,6 +69,7 @@ public class MessageActivity extends Activity {
 
     Uri outUri;
     String fileName;
+    String longFileName;
     Bitmap resultBitmap;
 
     Uri audioUri;
@@ -119,6 +120,17 @@ public class MessageActivity extends Activity {
             @Override
             public void onClick(View v) {
                 takePicture();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(Intent.ACTION_SEND);
+                        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        intent.putExtra("address",phoneNumber);
+                        intent.putExtra(Intent.EXTRA_STREAM,outUri);
+                        intent.setType("image/*");
+                        startActivity(intent);
+                    }
+                },1000);
             }
         });
 
@@ -138,7 +150,7 @@ public class MessageActivity extends Activity {
         protected Void doInBackground(Void... voids) {
             File file = Environment.getExternalStorageDirectory();
             fileName = file.getAbsolutePath() + "/record" + num + ".mp3";
-            startRecording();
+            startRecording(fileName);
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -148,11 +160,24 @@ public class MessageActivity extends Activity {
                 }
             },10000);
 
+            longFileName = file.getAbsolutePath() + "/long" + num + ".mp3";
+            startRecording(longFileName);
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if(mediaRecorder != null) {
+                        mediaRecorder.stop();
+                        mediaRecorder.release();
+                        mediaRecorder = null;
+                    }
+                }
+            }, 50000);
+
             return null;
         }
     }
 
-    private void startRecording() {
+    private void startRecording(String fileName) {
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
@@ -234,7 +259,7 @@ public class MessageActivity extends Activity {
                     String outUriStr = MediaStore.Images.Media.insertImage(
                             getContentResolver(),resultBitmap,"image","jpeg");
                     if(outUriStr == null) {
-                        Log.d("capture", "image insert failed");
+                        Log.i("captureiss", "image insert failed");
                         return;
                     } else {
                         outUri = Uri.parse(outUriStr);
@@ -248,12 +273,7 @@ public class MessageActivity extends Activity {
                 }
             }
         });
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.putExtra("address",phoneNumber);
-        intent.putExtra(Intent.EXTRA_STREAM,outUri);
-        intent.setType("image/*");
-        startActivity(intent);
+
 
     }
 
@@ -273,27 +293,6 @@ public class MessageActivity extends Activity {
     }
 
     private void sendFile() {
-
-        /*ShareCompat.IntentBuilder shareIntent = ShareCompat.IntentBuilder
-                .from((Activity)this).setType("image/audio/*");
-        shareIntent.addStream(outUri);
-        shareIntent.addStream(audioUri);
-        //shareIntent.addEmailTo(phoneNumber);
-        Intent intent = shareIntent.getIntent();
-        intent.putExtra("address", phoneNumber); //전화번호만 첨부하면 ok
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivity(intent);*/
-
-        /*Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_SEND_MULTIPLE);
-        intent.putExtra("address", phoneNumber);
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-        String[] extraMimeTypes = {"image/*", "audio/*"};
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, extraMimeTypes);
-        //intent.putExtra(Intent.EXTRA_STREAM,audioUri);
-        startActivity(intent);*/
-
         Intent intent = new Intent(Intent.ACTION_SEND);
         //intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.putExtra("address",phoneNumber);
