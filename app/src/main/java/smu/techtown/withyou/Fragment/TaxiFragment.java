@@ -52,10 +52,7 @@ public class TaxiFragment extends Fragment {
     File file;
 
     int onOff= 1;
-
-    public TaxiFragment() {
-        // Required empty public constructor
-    }
+    Uri uri;
 
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
@@ -94,7 +91,7 @@ public class TaxiFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                Uri uri = FileProvider.getUriForFile(getContext(),
+                uri = FileProvider.getUriForFile(getContext(),
                         "smu.techtown.withyou.fileprovider",file);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
                 startActivityForResult(intent, 101);
@@ -109,22 +106,28 @@ public class TaxiFragment extends Fragment {
                     case 0: //하차버튼 클릭 시
                         makeTaxiMessage(onOff);
                         sendTaxiMessage();
+                        sendLocation();
                         TaxiBtn.setText("승   차");
                         firstTaxiEditText.setText(null);
                         lastTaxiEditText.setText(null);
                         taxiSpinner.setSelection(0);
                         hourSpinner.setSelection(0);
                         minSpinner.setSelection(0);
+                        imageView.setImageBitmap(null);
                         onOff = 1;
                         break;
                     case 1: //승차버튼 클릭시
                         makeTaxiMessage(onOff);
                         if(sendTaxiMessage()){
                             TaxiBtn.setText("하   차");
+                            sendLocation();
+                            if(uri != null)
+                                sendTaxiImage();
                             onOff = 0;
                         }
                         else
                             onOff = 1;
+
                         break;
                 }
             }
@@ -187,5 +190,28 @@ public class TaxiFragment extends Fragment {
             Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
             imageView.setImageBitmap(bitmap);
         }
+    }
+
+    private boolean sendLocation(){
+        try{
+            String phoneNumber = PreferenceManager.getString(getActivity(), "phone number");
+            smsManager = SmsManager.getDefault();
+            String address = PreferenceManager.getString(getActivity(),"address");
+            smsManager.sendTextMessage(phoneNumber, null, address,
+                    null,null);
+            return true;
+        }catch (IllegalArgumentException e){
+            Toast.makeText(getActivity(),"긴급 번호를 설정해주세요",Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+    }
+
+    private void sendTaxiImage() {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.putExtra("address",phoneNumber);
+        intent.putExtra(Intent.EXTRA_STREAM,uri);
+        intent.setType("image/*");
+        startActivity(intent);
     }
 }
