@@ -1,12 +1,20 @@
 package smu.techtown.withyou.Fragment;
 
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import smu.techtown.withyou.PreferenceManager;
 import smu.techtown.withyou.R;
 
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.telephony.SmsManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,11 +22,15 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static android.app.Activity.RESULT_OK;
 
 
 /**
@@ -31,10 +43,13 @@ public class TaxiFragment extends Fragment {
     Button TaxiBtn;
     EditText firstTaxiEditText;
     EditText lastTaxiEditText;
+    Button cameraBtn;
+    ImageView imageView;
 
     SmsManager smsManager;
     String taxiMessage;
     String phoneNumber;
+    File file;
 
     int onOff= 1;
 
@@ -43,7 +58,7 @@ public class TaxiFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_taxi, container, false);
@@ -70,6 +85,21 @@ public class TaxiFragment extends Fragment {
 
         firstTaxiEditText = (EditText)view.findViewById(R.id.firstTaxiNum);
         lastTaxiEditText = (EditText)view.findViewById(R.id.lastTaxiNum);
+
+        imageView = view.findViewById(R.id.imageView);
+        File sdcard = Environment.getExternalStorageDirectory();
+        file = new File(sdcard, "taxi.jpg");
+        cameraBtn = view.findViewById(R.id.cameraBtn);
+        cameraBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                Uri uri = FileProvider.getUriForFile(getContext(),
+                        "smu.techtown.withyou.fileprovider",file);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                startActivityForResult(intent, 101);
+            }
+        });
 
         TaxiBtn = (Button)view.findViewById(R.id.TaxiBtn);
         TaxiBtn.setOnClickListener(new View.OnClickListener() {
@@ -147,4 +177,15 @@ public class TaxiFragment extends Fragment {
 
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == 101 && resultCode == RESULT_OK) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 5;
+            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+            imageView.setImageBitmap(bitmap);
+        }
+    }
 }
